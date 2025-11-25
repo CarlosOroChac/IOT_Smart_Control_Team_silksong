@@ -1,50 +1,134 @@
 import 'dart:async';
-import 'sensor_interface.dart'; // Asegúrate de que este import sea correcto
+import 'package:smart_device_tester/sensor_interface.dart';
 
 class IotController {
-  // Hacemos que los sensores sean "nullable" (?) para que sean opcionales
-  final SensorInterface? generalSensor;
-  final SensorInterface? humiditySensor;
-  final SensorInterface? coxDetector;
-  final SensorInterface? lightDetector;
-  final SensorInterface? sensor; // El sensor principal para tus tests
+  final SensorInterface generalSensor;
+  final SensorInterface humiditySensor;
+  final SensorInterface coxDetector;
+  final SensorInterface lightDetector;
 
-  // Constructor con parámetros nombrados opcionales
+  // Estado
+  double lastReading = 0.0;
+  bool isLoading = false;
+  bool alarmTriggered = false;
+  List<double> readingHistory = [];
+
   IotController({
-    this.generalSensor,
-    this.humiditySensor,
-    this.coxDetector,
-    this.lightDetector,
-    this.sensor,
+    required this.generalSensor,
+    required this.humiditySensor,
+    required this.coxDetector,
+    required this.lightDetector, required sensor,
   });
 
-  get lastReading => null;
+  // ==========================================================
+  // LÓGICA PURA (Unit Tests - Requisito 1)
+  // Métodos síncronos sin dependencias externas
+  // ==========================================================
 
-  /// Método para obtener temperatura.
-  /// Prioriza el 'sensor' inyectado (para tests), luego 'generalSensor', 
-  /// o retorna un valor por defecto si no hay ninguno.
-  Future<double> getTemperature() async {
-    // Simular un pequeño retardo de red/hardware real si no es un test
-    if (sensor == null) {
-      await Future.delayed(const Duration(milliseconds: 500));
+  /// 1. Convierte Celsius a Fahrenheit
+  double celsiusToFahrenheit(double celsius) {
+    return (celsius * 9 / 5) + 32;
+  }
+
+  /// 2. Valida si la temperatura es segura (ej. 10°C a 40°C)
+  bool isTempSafe(double temp) {
+    return temp >= 10.0 && temp <= 40.0;
+  }
+
+  /// 3. Verifica si el nivel de gas es crítico (> 100)
+  bool isGasCritical(double ppm) {
+    return ppm > 100.0;
+  }
+
+  /// 4. Valida que la lectura no sea negativa (hardware error check)
+  bool isValidReading(double value) {
+    return value >= 0;
+  }
+
+  /// 5. Calcula el promedio del historial
+  double calculateAverage(List<double> values) {
+    if (values.isEmpty) return 0.0;
+    double sum = values.reduce((a, b) => a + b);
+    return sum / values.length;
+  }
+
+  /// 6. Formatea la lectura para UI
+  String formatReading(double value) {
+    return value.toStringAsFixed(2);
+  }
+
+  /// 7. Agrega al historial (Lógica de estado)
+  void addToHistory(double value) {
+    if (readingHistory.length >= 10) {
+      readingHistory.removeAt(0);
     }
+    readingHistory.add(value);
+  }
 
+  /// 8. Reinicia la alarma manualmente
+  void resetAlarm() {
+    alarmTriggered = false;
+  }
+
+  /// 9. Determina el estado del sistema basado en luz
+  String getLightStatus(double lux) {
+    if (lux < 50) return "Night Mode";
+    if (lux > 1000) return "Bright Sunlight";
+    return "Normal";
+  }
+
+  /// 10. Verifica batería baja (simulada)
+  bool isBatteryLow(double voltage) {
+    return voltage < 3.3;
+  }
+
+  // ==========================================================
+  // MÉTODOS ASÍNCRONOS (Integration Tests - Requisito 3)
+  // Comunicación con Hardware
+  // ==========================================================
+
+  Future<double> fetchGeneralReading() async {
+    isLoading = true;
     try {
-      if (sensor != null) {
-        return await sensor!.readTemperature();
-      } else if (generalSensor != null) {
-        return await generalSensor!.readTemperature();
-      }
-      
-      // Lógica por defecto si no hay sensores conectados (Modo Demo)
-      return 20.0; 
-    } catch (e) {
-      rethrow; // Permitir que la UI maneje la excepción
+      final value = await generalSensor.readValue();
+      lastReading = value;
+      addToHistory(value);
+      return value;
+    } finally {
+      isLoading = false;
     }
   }
 
-  Future fetchGeneralReading() async {}
+  Future<double> fetchHumidityWithFallback() async {
+    try {
+      return await humiditySensor.readHumidity();
+    } catch (e) {
+      return -1.0; // Fallback seguro
+    }
+  }
 
-  // Aquí puedes agregar el resto de métodos para los otros sensores
-  // usando la misma lógica de verificar si son != null
+  Future<void> monitorCriticalGas() async {
+    final level = await coxDetector.readCOxLevel();
+    if (isGasCritical(level)) {
+      coxDetector.triggerVentilation(); // Comando al hardware
+      alarmTriggered = true;
+    }
+  }
+
+  Future<double> fetchGeneralReadingWithTimeout({required Duration timeout}) async {
+    return await generalSensor.readValue().timeout(timeout);
+  }
+  
+  Future<double> fetchLightLevelWithLatency() async {
+    isLoading = true;
+    final val = await lightDetector.readLux();
+    isLoading = false;
+    return val;
+  }
+
+  Future<double> getTemperature() async {
+    // Return the current temperature by delegating to the general reading method.
+    // This ensures a non-null Future<double> is always returned.
+    return await fetchGeneralReading();
+  }
 }

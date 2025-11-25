@@ -4,9 +4,9 @@ import '../IotController.dart';
 
 class ControlPanelWidget extends StatefulWidget {
   // CLAVE: Permitir inyección del controlador para pruebas
-  final IotController? controller;
+  final IotController controller;
 
-  const ControlPanelWidget({Key? key, this.controller}) : super(key: key);
+  const ControlPanelWidget({Key? key, required this.controller}) : super(key: key);
 
   @override
   State<ControlPanelWidget> createState() => _ControlPanelWidgetState();
@@ -20,8 +20,8 @@ class _ControlPanelWidgetState extends State<ControlPanelWidget> {
   @override
   void initState() {
     super.initState();
-    // Si viene un mock en el constructor, úsalo. Si no, crea la instancia real.
-    _iotController = widget.controller ?? IotController(generalSensor: null, humiditySensor: null, coxDetector: null, lightDetector: null, sensor: null);
+    // Requiere que el controlador sea provisto por el padre (inyección).
+    _iotController = widget.controller;
   }
 
   // Método para actualizar datos simulando petición asíncrona

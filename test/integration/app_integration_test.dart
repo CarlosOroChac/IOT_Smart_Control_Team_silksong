@@ -21,10 +21,16 @@ void main() {
   late IotController controller;
 
   setUp(() {
-    mockSensor = MockSensor();
-    // Inyectamos el mock al controlador
-    controller = IotController(sensor: mockSensor as dynamic, generalSensor: null, humiditySensor: null, coxDetector: null, lightDetector: null);
-  });
+      mockSensor = MockSensor();
+      // Inyectamos el mock al controlador
+      controller = IotController(
+        sensor: mockSensor,
+        generalSensor: mockSensor,
+        humiditySensor: mockSensor,
+        coxDetector: mockSensor,
+        lightDetector: mockSensor,
+      );
+    });
 
   testWidgets('E2E: UI actualiza valor cuando el sensor responde EXITOSAMENTE', (WidgetTester tester) async {
     // ARRANGE: Configurar el mock para retornar 25.5 grados
