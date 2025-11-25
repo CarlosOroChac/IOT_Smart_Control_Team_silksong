@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:smart_device_tester/IotController.dart';
+// ignore: unused_import
 import 'package:smart_device_tester/sensor_interface.dart';
 
 import 'mock_sensor.dart';

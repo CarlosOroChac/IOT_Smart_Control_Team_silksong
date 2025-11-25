@@ -2,6 +2,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/profile_model.dart';
+// ignore: unused_import
 import 'dart:convert';
 
 class SettingsProvider extends ChangeNotifier {

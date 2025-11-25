@@ -9,6 +9,7 @@ import 'led_control_page.dart';
 import 'servo_control_page.dart';
 import 'profiles_page.dart';
 import '../providers/settings_provider.dart';
+// ignore: unused_import
 import 'dart:math' as math;
 
 class HomeScreen extends StatefulWidget {
