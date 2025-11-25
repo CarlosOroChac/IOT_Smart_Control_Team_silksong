@@ -25,7 +25,7 @@ void main() {
       generalSensor: generalSensor,
       humiditySensor: humiditySensor,
       coxDetector: coxDetector,
-      lightDetector: lightDetector,
+      lightDetector: lightDetector, sensor: null,
     );
   });
 

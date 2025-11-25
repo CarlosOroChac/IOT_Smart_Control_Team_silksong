@@ -6,6 +6,8 @@ class Thermostat {
 
   double get targetTemperature => _targetTemperature;
 
+  get currentTemp => null;
+
   /// Sets the target temperature while ensuring it respects the allowed range.
   /// Returns the applied temperature so tests can assert the clamp logic.
   double setTargetTemperature(double newTemperature) {
@@ -18,4 +20,10 @@ class Thermostat {
     }
     return _targetTemperature;
   }
+
+  void increase() {}
+
+  void decrease() {}
+
+  isValidRange(double d) {}
 }

@@ -1,6 +1,6 @@
 import 'package:mocktail/mocktail.dart';
-import 'package:smart_device_tester/sensor_interface.dart';
+// Asegúrate de que este import apunte a tu proyecto real
+import 'package:smart_device_tester/sensor_interface.dart'; 
 
-class MockSensor extends Mock
-    implements SensorInterface, HumiditySensor, COxDetector, LightDetector {}
-
+// Clase Mock que implementa la interfaz completa
+class MockSensor extends Mock implements SensorInterface {}
