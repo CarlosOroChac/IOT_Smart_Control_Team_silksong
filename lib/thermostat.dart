@@ -1,29 +1,40 @@
 class Thermostat {
+  // Constantes públicas (para que el test pueda acceder si lo necesita)
   static const double minTemperature = 15.0;
   static const double maxTemperature = 30.0;
 
-  double _targetTemperature = 20.0;
+  // Variable interna privada
+  double _currentTemp = 20.0;
 
-  double get targetTemperature => _targetTemperature;
+  // 1. Getter 'currentTemp' (El test lo pide así: thermostat.currentTemp)
+  double get currentTemp => _currentTemp;
+  
+  // Getter alias por si algún otro test usa 'targetTemperature'
+  double get targetTemperature => _currentTemp;
 
-  get currentTemp => null;
-
-  /// Sets the target temperature while ensuring it respects the allowed range.
-  /// Returns the applied temperature so tests can assert the clamp logic.
-  double setTargetTemperature(double newTemperature) {
-    if (newTemperature < minTemperature) {
-      _targetTemperature = minTemperature;
-    } else if (newTemperature > maxTemperature) {
-      _targetTemperature = maxTemperature;
+  // 2. Método Setter (El test usa: thermostat.setTargetTemperature(val))
+  double setTargetTemperature(double temp) {
+    if (temp < minTemperature) {
+      _currentTemp = minTemperature;
+    } else if (temp > maxTemperature) {
+      _currentTemp = maxTemperature;
     } else {
-      _targetTemperature = newTemperature;
+      _currentTemp = temp;
     }
-    return _targetTemperature;
+    return _currentTemp;
   }
 
-  void increase() {}
+  // 3. Métodos increase/decrease (El test los pide)
+  void increase() {
+    setTargetTemperature(_currentTemp + 1);
+  }
 
-  void decrease() {}
+  void decrease() {
+    setTargetTemperature(_currentTemp - 1);
+  }
 
-  isValidRange(double d) {}
+  // 4. Método isValidRange (El test #12 y #13 lo piden explícitamente)
+  bool isValidRange(double temp) {
+    return temp >= minTemperature && temp <= maxTemperature;
+  }
 }
