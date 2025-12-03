@@ -5,5 +5,7 @@ class BatteryMonitor {
     }
     return level <= 10;
   }
+
+  void updateLevel(int i) {}
 }
 
